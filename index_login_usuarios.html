@@ -1,0 +1,74 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>La Esencia · Solicitudes de Materia Prima</title>
+  <style>
+    :root{--bg:#f7f2ea;--card:#fffaf3;--ink:#2d241b;--muted:#766b60;--line:#e7d9c8;--accent:#8b5e34;--danger:#b7392f;--ok:#2f7d4f;}
+    *{box-sizing:border-box} body{margin:0;font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;background:var(--bg);color:var(--ink)}
+    header{padding:22px 16px;background:linear-gradient(135deg,#3a291d,#8b5e34);color:white} header h1{margin:0;font-size:24px} header p{margin:6px 0 0;opacity:.9}
+    main{max-width:1180px;margin:0 auto;padding:18px}.tabs{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px}.tab{border:1px solid var(--line);background:var(--card);padding:10px 14px;border-radius:999px;cursor:pointer;font-weight:700}.tab.active{background:var(--accent);color:white;border-color:var(--accent)}
+    .grid{display:grid;grid-template-columns:1fr 1fr;gap:16px}.card{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:16px;box-shadow:0 6px 18px rgba(45,36,27,.06)}h2{margin:0 0 12px;font-size:20px}
+    label{display:block;font-weight:700;margin:12px 0 6px}input,select,textarea{width:100%;border:1px solid var(--line);border-radius:12px;padding:11px;background:white;color:var(--ink);font-size:15px}textarea{min-height:90px;resize:vertical}
+    button{border:0;border-radius:12px;padding:11px 13px;font-weight:800;cursor:pointer;background:var(--accent);color:white}button.secondary{background:#efe2d2;color:var(--ink)}button.danger{background:var(--danger)}button.small{padding:7px 9px;font-size:13px}.actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}.hidden{display:none}
+    table{width:100%;border-collapse:collapse;margin-top:8px}th,td{border-bottom:1px solid var(--line);padding:10px;text-align:left;vertical-align:top;font-size:14px}th{color:var(--muted);font-size:12px;text-transform:uppercase;letter-spacing:.04em}.muted{color:var(--muted)}
+    .badge{display:inline-flex;border-radius:999px;padding:5px 9px;font-weight:800;font-size:12px;white-space:nowrap}.Pendiente{background:#fff3bf;color:#6b4b00}.Pedido{background:#ffe4c2;color:#7a3f00}.Recibido{background:#d8f3dc;color:#1f6f43}.Entregado{background:#e6f4ea;color:#155d32}.Cancelado{background:#f7d7d4;color:#84211a}
+    .kpis{display:grid;grid-template-columns:repeat(5,1fr);gap:8px;margin:12px 0}.kpi{background:white;border:1px solid var(--line);border-radius:14px;padding:10px}.kpi strong{display:block;font-size:20px}.filterbar{display:grid;grid-template-columns:1fr 1fr auto;gap:8px;margin-bottom:10px}.toast{position:fixed;left:50%;bottom:18px;transform:translateX(-50%);background:#2d241b;color:white;padding:12px 16px;border-radius:999px;box-shadow:0 8px 24px rgba(0,0,0,.25);display:none}
+    .authbox{max-width:520px;margin:18px auto}.userbar{display:flex;justify-content:space-between;gap:10px;align-items:center;margin-bottom:14px}.userbar .muted{font-size:14px}.login-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}
+    @media(max-width:850px){.grid{grid-template-columns:1fr}.kpis{grid-template-columns:repeat(2,1fr)}.filterbar{grid-template-columns:1fr}th:nth-child(1),td:nth-child(1){display:none}}
+  </style>
+</head>
+<body>
+<header><h1>La Esencia · Solicitudes de materia prima</h1><p>Empleado solicita · Administración procesa · Todos ven el estado</p></header>
+<section id="loginBox" class="authbox card"><h2>Entrar</h2><p class="muted">Cada empleado entra con su usuario. El solicitante se rellenará automáticamente.</p><label>Email</label><input id="loginEmail" type="email" placeholder="ej: andrea@laesencia.com" autocomplete="username"><label>Contraseña</label><input id="loginPassword" type="password" placeholder="Contraseña" autocomplete="current-password"><div class="login-actions"><button onclick="login()">Entrar</button></div></section>
+<main id="app" class="hidden">
+  <div class="userbar card"><div><strong id="usuarioNombre">Usuario</strong><div class="muted" id="usuarioEmail"></div></div><button class="secondary" onclick="logout()">Cerrar sesión</button></div>
+  <div class="tabs"><button class="tab active" onclick="showTab('empleado', this)">Empleado</button><button class="tab" onclick="showTab('admin', this)">Administración</button><button class="tab" onclick="showTab('historico', this)">Histórico</button></div>
+  <section id="empleado"><div class="grid"><div class="card"><h2>Nueva solicitud</h2><label>Solicitante</label><input id="solicitante" placeholder="Se rellena automáticamente" readonly><label>Materia prima / consumible</label><input id="materia" list="materias" placeholder="Ej: pistacho, mantequilla, envases 500 ml"><datalist id="materias"><option value="Harina fuerza"><option value="Harina integral"><option value="Mantequilla"><option value="Leche"><option value="Azúcar"><option value="Chocolate Cacahuat"><option value="Pistacho"><option value="Mango"><option value="Envases 250 ml"><option value="Envases 500 ml"></datalist><label>Cantidad</label><input id="cantidad" placeholder="Ej: 5 kg, 2 cajas, 20 litros"><label>Observaciones</label><textarea id="observaciones" placeholder="Ej: queda poco stock / necesario para fin de semana"></textarea><div class="actions"><button onclick="crearSolicitud()">Solicitar</button><button class="secondary" onclick="limpiarFormulario()">Limpiar</button></div></div><div class="card"><h2>Solicitudes</h2><p class="muted">Puedes revisar el estado de las solicitudes.</p><input id="filtroEmpleado" placeholder="Filtrar solicitudes" oninput="render()"><div id="misSolicitudes"></div></div></div></section>
+  <section id="admin" class="hidden"><div class="card"><h2>Panel administración</h2><div class="kpis" id="kpis"></div><div class="filterbar"><input id="buscar" placeholder="Buscar materia, solicitante, observaciones..." oninput="render()"><select id="fEstado" onchange="render()"><option value="">Todos los estados</option></select><button class="secondary" onclick="exportarCSV()">Exportar CSV</button></div><div id="adminTabla"></div></div></section>
+  <section id="historico" class="hidden"><div class="card"><h2>Histórico</h2><p class="muted">Solicitudes entregadas o canceladas.</p><div id="historicoTabla"></div></div></section>
+</main><div id="toast" class="toast"></div>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+const SUPABASE_URL = 'https://bfjvuokbvbakabjfzyvh.supabase.co';
+const SUPABASE_ANON_KEY = 'sb_publishable_2ed5UeI_h8TLtsDnLqYYqA_d6-f6tPO';
+const db = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+const TABLA = 'Solicitudes';
+const estados = ['Pendiente','Pedido','Recibido','Entregado','Cancelado'];
+const nombresUsuarios = {
+  'hadder@laesencia.com': 'Hadder',
+  'andrea@laesencia.com': 'Andrea',
+  'josue@laesencia.com': 'Josué',
+  'antoine@laesencia.com': 'Antoine',
+  'javi@laesencia.com': 'Javi'
+};
+let usuarioActual = null;
+let solicitudes = [];
+function toast(msg){const t=document.getElementById('toast');t.textContent=msg;t.style.display='block';setTimeout(()=>t.style.display='none',2200)}
+function nombreDesdeEmail(email){return nombresUsuarios[(email||'').toLowerCase()] || (email||'').split('@')[0] || 'Empleado'}
+function mostrarLogin(){document.getElementById('loginBox').classList.remove('hidden');document.getElementById('app').classList.add('hidden')}
+function mostrarApp(){document.getElementById('loginBox').classList.add('hidden');document.getElementById('app').classList.remove('hidden');document.getElementById('usuarioNombre').textContent=usuarioActual.nombre;document.getElementById('usuarioEmail').textContent=usuarioActual.email;document.getElementById('solicitante').value=usuarioActual.nombre}
+async function comprobarSesion(){const {data}=await db.auth.getSession();const user=data?.session?.user;if(user){usuarioActual={email:user.email,nombre:nombreDesdeEmail(user.email)};mostrarApp();await cargarSolicitudes()}else{mostrarLogin()}}
+async function login(){const email=document.getElementById('loginEmail').value.trim().toLowerCase();const password=document.getElementById('loginPassword').value;if(!email||!password){toast('Faltan email o contraseña');return}const {data,error}=await db.auth.signInWithPassword({email,password});if(error){toast('Error entrando: '+error.message);console.error(error);return}usuarioActual={email:data.user.email,nombre:nombreDesdeEmail(data.user.email)};document.getElementById('loginPassword').value='';mostrarApp();await cargarSolicitudes();toast('Sesión iniciada')}
+async function logout(){await db.auth.signOut();usuarioActual=null;solicitudes=[];mostrarLogin();toast('Sesión cerrada')}
+function badge(e){return `<span class="badge ${e||'Pendiente'}">${e||'Pendiente'}</span>`}
+function showTab(id, btn){['empleado','admin','historico'].forEach(x=>document.getElementById(x).classList.add('hidden'));document.getElementById(id).classList.remove('hidden');document.querySelectorAll('.tab').forEach(b=>b.classList.remove('active'));btn.classList.add('active');render()}
+function limpiarFormulario(){['materia','cantidad','observaciones'].forEach(id=>document.getElementById(id).value='')}
+function fechaBonita(f){if(!f)return '';try{return new Date(f).toLocaleString('es-ES',{dateStyle:'short',timeStyle:'short'})}catch{return f}}
+function initSelects(){const s=document.getElementById('fEstado');estados.forEach(e=>{let o=document.createElement('option');o.value=e;o.textContent=e;s.appendChild(o)})}
+async function cargarSolicitudes(){const {data,error}=await db.from(TABLA).select('*').order('FechaSolicitud',{ascending:false});if(error){toast('Error leyendo Supabase: '+error.message);console.error(error);return}solicitudes=data||[];render()}
+async function crearSolicitud(){if(!usuarioActual){toast('Primero tienes que entrar');return}const Solicitante=usuarioActual.nombre;document.getElementById('solicitante').value=Solicitante;const Materiaprima=document.getElementById('materia').value.trim();const Cantidad=document.getElementById('cantidad').value.trim();const Observaciones=document.getElementById('observaciones').value.trim();if(!Materiaprima||!Cantidad){toast('Faltan materia prima o cantidad');return}const payload={Solicitante,Materiaprima,Cantidad,Observaciones,Estado:'Pendiente',FechaSolicitud:new Date().toISOString()};const {error}=await db.from(TABLA).insert(payload);if(error){toast('Error guardando: '+error.message);console.error(error);return}limpiarFormulario();document.getElementById('solicitante').value=Solicitante;toast('Solicitud enviada');await cargarSolicitudes()}
+async function actualizar(id,campo,valor){const {error}=await db.from(TABLA).update({[campo]:valor}).eq('id',id);if(error){toast('Error actualizando: '+error.message);console.error(error);return}await cargarSolicitudes()}
+async function eliminar(id){if(!confirm('¿Eliminar esta solicitud?'))return;const {error}=await db.from(TABLA).delete().eq('id',id);if(error){toast('Error eliminando: '+error.message);console.error(error);return}toast('Solicitud eliminada');await cargarSolicitudes()}
+function renderEmpleado(){const f=document.getElementById('filtroEmpleado').value.trim().toLowerCase();const lista=solicitudes.filter(s=>!f||(s.Solicitante||'').toLowerCase().includes(f));document.getElementById('misSolicitudes').innerHTML=tablaEmpleado(lista)}
+function tablaEmpleado(lista){if(!lista.length)return '<p class="muted">No hay solicitudes todavía.</p>';return `<table><thead><tr><th>Fecha</th><th>Materia</th><th>Cantidad</th><th>Estado</th><th>Info admin</th></tr></thead><tbody>`+lista.map(s=>`<tr><td>${fechaBonita(s.FechaSolicitud)}<br><strong>${s.Solicitante||''}</strong></td><td><strong>${s.Materiaprima||''}</strong><br><span class="muted">${s.Observaciones||''}</span></td><td>${s.Cantidad||''}</td><td>${badge(s.Estado)}</td><td>${s.FechaEntrega?`<strong>Entrega:</strong> ${s.FechaEntrega}<br>`:''}${s.Proveedor?`<strong>Proveedor:</strong> ${s.Proveedor}`:'<span class="muted">Sin datos aún</span>'}</td></tr>`).join('')+'</tbody></table>'}
+function renderAdmin(){const q=(document.getElementById('buscar').value||'').toLowerCase();const fe=document.getElementById('fEstado').value;const activos=solicitudes.filter(s=>!['Entregado','Cancelado'].includes(s.Estado||''));const lista=activos.filter(s=>(!fe||(s.Estado||'')===fe)&&(!q||JSON.stringify(s).toLowerCase().includes(q)));document.getElementById('kpis').innerHTML=estados.map(e=>`<div class="kpi"><strong>${solicitudes.filter(s=>(s.Estado||'Pendiente')===e).length}</strong><span class="muted">${e}</span></div>`).join('');document.getElementById('adminTabla').innerHTML=tablaAdmin(lista)}
+function tablaAdmin(lista){if(!lista.length)return '<p class="muted">No hay solicitudes activas.</p>';return `<table><thead><tr><th>Solicitud</th><th>Materia</th><th>Cantidad</th><th>Gestión</th><th></th></tr></thead><tbody>`+lista.map(s=>`<tr><td>${fechaBonita(s.FechaSolicitud)}<br><strong>${s.Solicitante||''}</strong></td><td><strong>${s.Materiaprima||''}</strong><br><span class="muted">${s.Observaciones||''}</span></td><td>${s.Cantidad||''}</td><td><label>Estado</label><select onchange="actualizar('${s.id}','Estado',this.value)">${estados.map(e=>`<option value="${e}" ${(s.Estado||'Pendiente')===e?'selected':''}>${e}</option>`).join('')}</select><label>Fecha entrega</label><input type="date" value="${s.FechaEntrega||''}" onchange="actualizar('${s.id}','FechaEntrega',this.value)"><label>Proveedor</label><input value="${s.Proveedor||''}" onchange="actualizar('${s.id}','Proveedor',this.value)" placeholder="Proveedor"></td><td><button class="small danger" onclick="eliminar('${s.id}')">Eliminar</button></td></tr>`).join('')+'</tbody></table>'}
+function renderHistorico(){document.getElementById('historicoTabla').innerHTML=tablaEmpleado(solicitudes.filter(s=>['Entregado','Cancelado'].includes(s.Estado||'')))}
+function render(){renderEmpleado();renderAdmin();renderHistorico()}
+function exportarCSV(){const headers=['FechaSolicitud','Solicitante','Materiaprima','Cantidad','Observaciones','Estado','FechaEntrega','Proveedor'];const rows=[headers.join(';')].concat(solicitudes.map(s=>headers.map(h=>`"${String(s[h]||'').replaceAll('"','""')}"`).join(';')));const blob=new Blob([rows.join('\n')],{type:'text/csv;charset=utf-8'});const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='solicitudes_materia_prima_la_esencia.csv';a.click()}
+initSelects();comprobarSesion();
+</script>
+</body>
+</html>
